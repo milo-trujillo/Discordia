@@ -30,4 +30,4 @@ The Haskell server requires System.IO, which should come with ghc, and Network.S
 History
 -------
 
-This project started as a highschool compsci project, which archived at [csChatServ.](https://github.com/milo-trujillo/csChatServ)
+This project started as a highschool compsci project, which is archived at [csChatServ.](https://github.com/milo-trujillo/csChatServ)
