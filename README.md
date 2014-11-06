@@ -1,22 +1,21 @@
-csChatServ
-==========
+Discordia
+=========
 
 Overview
 --------
-My goal is to create a multi-threaded chat system allowing communication be-tween machines. The system will consist of two parts: a chat server written in Haskell, and an accompanying chat client written in Java.  
+This is a tiny, rapidly deployable chat server and accompanying client. Lighter than IRC, dead simple to deploy, and better than netcat!
+
+The server portion is built in Haskell for concurrency and avoiding memory leaks, while the client is written in Java to be cross platform.
 
 Server
 ------
-The chat server will be a tcp-daemon written in Haskell. It will wait for incoming connections, and upon receiving them, fork to handle the socket. Messages from a socket will be forwarded to all other sockets in an IRC-like manner. The server will manage usernames and inter-socket communication, but will not support
-multiple channels or servers like a full IRC system. Haskell was chosen for its
-succinctness and ease of multi-threading.
+
+The server is a multithreaded, IRC-esque creation. You just open a socket to it, choose a username, and then everything you write will be relayed by the server to any other connected clients.
 
 Client
 ------
-The chat client will be a Java frontend to the socket APIs. It will manage a
-GUI that takes messages from a user, breaks them into packets, and transmits
-them to the server. Upon receiving a message from the server the message will
-be displayed to the user. Java was chosen for its cross-platform GUI elements.
+
+The client is mostly just a Java frontend to some sockets. It connects to the server, sends and receives messages, and generally tries to make the chat process better than netcat would.
 
 Dependencies
 ------------
@@ -27,3 +26,8 @@ The Java client requires javax, swing, and some networking libraries that probab
 ### Server
 
 The Haskell server requires System.IO, which should come with ghc, and Network.Socket, which may not.
+
+History
+-------
+
+This project started as a highschool compsci project, which archived at [csChatServ.](https://github.com/milo-trujillo/csChatServ)
