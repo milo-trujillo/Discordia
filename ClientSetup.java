@@ -76,3 +76,4 @@ public class ClientSetup extends JFrame implements ActionListener
 		return new String [] {hostInput.getText(), portInput.getText()};
 	}
 }
+
