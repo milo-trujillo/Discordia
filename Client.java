@@ -21,6 +21,9 @@ public class Client extends JFrame implements ActionListener
 	private static JTextField input;
 	private static PrintWriter outs;
 
+	// Plays sound effects for client events
+	private static SoundPlayer sounds;
+
 	// This is the window where the user enters port number and hostname
 	private static ClientSetup setup;
 
@@ -33,6 +36,8 @@ public class Client extends JFrame implements ActionListener
 		setTitle("Chat Client");
 		setSize(320, 220);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		sounds = new SoundPlayer();
 
 		display = new JTextArea("Connecting to host: " + host);
 		display.setLineWrap(true);
@@ -59,7 +64,7 @@ public class Client extends JFrame implements ActionListener
 	}
 
 	// This is called to connect to a server and read from the socket
-	private static void connectToServer( InetAddress host, int port )
+	private void connectToServer( InetAddress host, int port )
 	{
 		try
 		{
@@ -86,6 +91,8 @@ public class Client extends JFrame implements ActionListener
 					display.selectAll();
 					int x = display.getSelectionEnd();
 					display.select(x,x);
+					if( !isActive() || !isFocused() )
+						sounds.play("new message");
 				}
 				catch(IOException e)
 				{
@@ -150,9 +157,9 @@ public class Client extends JFrame implements ActionListener
 		if( host != null && port != 0 )
 		{
 			// Set up the chat GUI
-			JFrame frame = new Client(host.getHostName() + ":" + port + "\n");
-			frame.setVisible(true);
-			connectToServer(host, port);
+			Client c = new Client(host.getHostName() + ":" + port + "\n");
+			c.setVisible(true);
+			c.connectToServer(host, port);
 		}
 	}
 }
