@@ -7,10 +7,10 @@ server:
 	$(HC) Server.hs
 
 client:
-	$(JAVAC) Client.java
+	$(JAVAC) Client.java SoundPlayer.java
 
 jar:
-	$(JAR) cvfe Client.jar Client Client.class ClientSetup.class sounds/msg.wav
+	$(JAR) cvfe Client.jar Client Client.class ClientSetup.class SoundPlayer.class sounds/msg.wav
 
 all:
 	$(HC) Server.hs
