@@ -5,6 +5,7 @@ import java.applet.*;
 public class SoundPlayer
 {
 	private static AudioClip msgReceived;
+	private boolean playing = false;
 
 	public SoundPlayer()
 	{
@@ -25,8 +26,12 @@ public class SoundPlayer
 	{
 		try
 		{
+			if( playing )
+				return;
+			playing = true;
 			if( s == "new message" )
 				msgReceived.play();
+			playing = false;
 		}
 		catch(Exception e)
 		{
