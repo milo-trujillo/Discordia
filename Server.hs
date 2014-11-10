@@ -30,6 +30,7 @@ main = do
 		-- Bind the socket to the listen port on every interface
 		bindSocket sock (SockAddrInet (fromIntegral portno) iNADDR_ANY)
 		listen sock max_connections 		-- Set max connections
+		putStrLn "Starting Discordia..."
 		forkIO (clearChannel msgs)			-- Prevent memory leak in msgs
 		listenLoop sock msgs
 	else
