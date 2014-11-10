@@ -5,7 +5,7 @@ import java.applet.*;
 public class SoundPlayer
 {
 	private static AudioClip msgReceived;
-	private boolean playing = false;
+	private volatile boolean playing = false;
 
 	public SoundPlayer()
 	{
