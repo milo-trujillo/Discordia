@@ -58,9 +58,10 @@ public class Client extends JFrame implements ActionListener
 		Object source = event.getSource();
 		if( !source.equals(input) || initialized == false )
 			return;
-		String text = input.getText(); 	// Get the text user has entered
-		input.setText(new String("")); 	// Clear text box
-		outs.println(text);				// Send text across the network
+		String text = input.getText().trim(); 	// Get the text user has entered
+		input.setText(new String("")); 			// Clear text box
+		if( text.length() > 0 )
+			outs.println(text);					// Send text across the network
 	}
 
 	// This is called to connect to a server and read from the socket
