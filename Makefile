@@ -7,18 +7,20 @@ JAR= jar
 JAROPTS= cvfe
 JARNAME= Client.jar
 
+JAVASRC= Client.java SoundPlayer.java
+
 server:
 	$(HC) Server.hs
 
 client:
-	$(JAVAC) Client.java SoundPlayer.java
+	$(JAVAC) $(JAVASRC)
 
 jar:
 	$(JAR) $(JAROPTS) $(JARNAME) Client Client.class ClientSetup.class SoundPlayer.class sounds/msg.wav
 
 all:
 	$(HC) Server.hs
-	$(JAVAC) Client.java
+	$(JAVAC) $(JAVASRC)
 
 clean:
 	rm *.o *.hi *.class *.jar Server
