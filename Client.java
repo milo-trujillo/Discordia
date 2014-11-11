@@ -34,7 +34,7 @@ public class Client extends JFrame implements ActionListener
 	public Client(String host)
 	{
 		setTitle("Chat Client");
-		setSize(350, 220);
+		setSize(355, 220);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		sounds = new SoundPlayer();
