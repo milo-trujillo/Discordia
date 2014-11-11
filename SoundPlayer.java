@@ -10,18 +10,20 @@ public class SoundPlayer
 	// This is marked volatile to make it threadsafe, so playing two sounds
 	// won't yield an exception
 	private volatile boolean playing = false;
+	private static volatile boolean initialized = false;
 
 	public SoundPlayer()
 	{
 		try
 		{
 			// Load all the sound files from disk if needed
-			if( msgReceived == null )
+			if( initialized == false )
 			{
 				URL url = this.getClass().getResource("sounds/msg.wav");
 				String file = url.toString();
 				String urls = file.replaceFirst("file:/", "file:///");
 				msgReceived = Applet.newAudioClip(new URL(urls));
+				initialized = true;
 			}
 		}
 		catch(Exception e)
