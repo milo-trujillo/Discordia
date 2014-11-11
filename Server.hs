@@ -8,6 +8,7 @@ import System.Environment	-- For getArgs
 import Network.Socket		-- For sockets
 import Control.Concurrent	-- For threads and channels
 import Control.Exception	-- For exceptions
+import Data.Text (strip, pack, unpack)	-- For strip
 
 -- Global vars for configuration
 max_connections = 30
@@ -79,9 +80,13 @@ readUser user sock msgs = do
 			)
 		where
 			getInput = do
-				msg <- hGetLine sock
-				writeChan msgs (user, msg)
-				readUser user sock msgs
+				fullmsg <- hGetLine sock
+				let msg = stripMsg fullmsg
+				if (length msg /= 0) -- Don't post blank messages
+					then do
+						writeChan msgs (user, msg)
+						readUser user sock msgs
+					else return ()
 
 -- This reads from the message queue and prints results over socket to user
 readMsgs :: Handle -> Chan Msg -> IO ()
@@ -98,6 +103,9 @@ clearChannel :: Chan Msg -> IO ()
 clearChannel chan = do
 	(_, _) <- readChan chan
 	clearChannel chan
+
+stripMsg :: String -> String
+stripMsg = unpack . Data.Text.strip . pack
 
 -- Checks if a string contains only an integer
 isInteger s = case reads s :: [(Integer, String)] of
