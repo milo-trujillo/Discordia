@@ -72,7 +72,7 @@ readUser user sock msgs = do
 		hClose sock
 		writeChan msgs (announce_name, user ++ " has left the server")
 	else do
-		catch(getInput)
+		Control.Exception.catch(getInput)
 			(\(SomeException _) ->do
 				hClose sock
 				writeChan msgs (announce_name, user ++ " has left the server")
@@ -104,10 +104,12 @@ clearChannel chan = do
 	(_, _) <- readChan chan
 	clearChannel chan
 
+-- Strips whitespace from the start and end of a string
 stripMsg :: String -> String
 stripMsg = unpack . Data.Text.strip . pack
 
 -- Checks if a string contains only an integer
+isInteger :: String -> Bool
 isInteger s = case reads s :: [(Integer, String)] of
 	[(_, "")] -> True
 	_         -> False
