@@ -30,6 +30,9 @@ public class Client extends JFrame implements ActionListener
 	// This is true when we're ready to read / write data to the network
 	private static boolean initialized = false;
 
+	// How many lines of scrollback to remember
+	private static final int HISTORY = 10000;
+
 	// Sets up the GUI elements, called once during setup
 	public Client(String host)
 	{
@@ -64,6 +67,21 @@ public class Client extends JFrame implements ActionListener
 			outs.println(text);					// Send text across the network
 	}
 
+	private void clearTopLine()
+	{
+		try
+		{
+			int end = display.getLineEndOffset(0);
+			display.replaceRange("", 0, end);
+		}
+		catch( Exception e )
+		{
+			// Do nothing, just don't delete the line if something went wrong
+			System.err.println("Internal error clearing screen: " 
+				+ e.getMessage());
+		}
+	}
+
 	// This is called to connect to a server and read from the socket
 	private void connectToServer( InetAddress host, int port )
 	{
@@ -92,6 +110,10 @@ public class Client extends JFrame implements ActionListener
 					display.selectAll();
 					int x = display.getSelectionEnd();
 					display.select(x,x);
+					// Delete the top line if we've hit the limit of history
+					int lines = display.getLineCount();
+					if( lines > HISTORY )
+						clearTopLine();
 					if( !isActive() || !isFocused() )
 						sounds.play("new message");
 				}
@@ -152,7 +174,7 @@ public class Client extends JFrame implements ActionListener
 				validHost = false;
 			}
 		}
-
+		
 		// This should always be true, but Java wants to be sure the vars
 		// are initialized
 		if( host != null && port != 0 )
