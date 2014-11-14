@@ -12,9 +12,10 @@ import Data.Text (strip, pack, unpack)	-- For stripping whitespace
 import Text.Regex.PCRE					-- For regexes
 
 -- Global vars for configuration
-max_connections = 30
-announce_name = "Server" -- Name used by all server announcements
-nick_regex = "([a-zA-Z0-9]+)" -- Valid characters for a nickname
+max_connections = 30				-- Max number of users that can be connected
+announce_name = "Discordia Server"	-- Name used by all server announcements
+nick_regex = "([a-zA-Z0-9]+)"		-- Valid characters for a nickname
+max_message_size = 500				-- Max character length of a message
 
 -- We'll define messages as (Username, Text)
 type Msg = (String, String)
@@ -92,8 +93,14 @@ readUser user sock msgs = do
 						-- We should probably break this out to a switch later
 						if (msg =~ ("^/nick " ++ nick_regex) :: Bool) 
 							then changeUsername user msg sock msgs
-							else do
+						else if( length msg < max_message_size )
+							then do
 								writeChan msgs (user, msg)
+								readUser user sock msgs
+							else do
+								writeChan msgs (announce_name, user 
+									++ " tried to send an oversized message (>"
+									++ (show max_message_size) ++ " characters)")
 								readUser user sock msgs
 					else readUser user sock msgs
 
@@ -101,12 +108,15 @@ readUser user sock msgs = do
 changeUsername :: String -> String -> Handle -> Chan Msg -> IO ()
 changeUsername user msg sock msgs = do
 	let results = (msg =~ ("^/nick " ++ nick_regex) :: [[String]])
-	if (length (results !! 0) == 2 && (results !! 0 !! 1) /= announce_name)
+	if (length (results !! 0) == 2)
 		then do
 			let newuser = results !! 0 !! 1
-			writeChan msgs (announce_name, 
-				user ++ " has changed their name to " ++ newuser)
-			readUser newuser sock msgs
+			if ((newuser =~ ("^" ++ announce_name ++ "$") :: Bool) == False)
+				then do
+					writeChan msgs (announce_name, 
+						user ++ " has changed their name to " ++ newuser)
+					readUser newuser sock msgs
+				else readUser user sock msgs
 	else readUser user sock msgs
 
 -- This reads from the message queue and prints results over socket to user
