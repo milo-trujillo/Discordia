@@ -3,16 +3,18 @@
 	handles usernames, but doesn't have channels or many other features.
 -}
 
-import System.IO			-- For handles
-import System.Environment	-- For getArgs
-import Network.Socket		-- For sockets
-import Control.Concurrent	-- For threads and channels
-import Control.Exception	-- For exceptions
-import Data.Text (strip, pack, unpack)	-- For strip
+import System.IO						-- For handles
+import System.Environment				-- For getArgs
+import Network.Socket					-- For sockets
+import Control.Concurrent				-- For threads and channels
+import Control.Exception				-- For exceptions
+import Data.Text (strip, pack, unpack)	-- For stripping whitespace
+import Text.Regex.PCRE					-- For regexes
 
 -- Global vars for configuration
 max_connections = 30
 announce_name = "Server" -- Name used by all server announcements
+nick_regex = "([a-zA-Z0-9]+)" -- Valid characters for a nickname
 
 -- We'll define messages as (Username, Text)
 type Msg = (String, String)
@@ -53,8 +55,10 @@ handleClient (sock, _) msgs = do
 	hPutStr s "Your name: "
 	name <- hGetLine s
 	hPutStrLn s "" -- Print a newline, since the previous hPutStr didn't
-	if (name == announce_name) then do
+	if (name == announce_name || (name =~ nick_regex :: Bool) == False ) then do
 		hPutStrLn s "Sorry, that's a forbidden name"
+		hPutStr s   "You may use only alphanumeric characters, "
+		hPutStrLn s "and may not impersonate the server."
 		hClose s
 	else do
 		hPutStrLn s ("Hello, " ++ name)
@@ -84,9 +88,25 @@ readUser user sock msgs = do
 				let msg = stripMsg fullmsg
 				if (length msg /= 0) -- Don't post blank messages
 					then do
-						writeChan msgs (user, msg)
-						readUser user sock msgs
-					else return ()
+						-- We should probably break this out to a switch later
+						if (msg =~ ("^/nick " ++ nick_regex) :: Bool) 
+							then changeUsername user msg sock msgs
+							else do
+								writeChan msgs (user, msg)
+								readUser user sock msgs
+					else readUser user sock msgs
+
+-- We parse the nick line to make sure it's okay, then change username
+changeUsername :: String -> String -> Handle -> Chan Msg -> IO ()
+changeUsername user msg sock msgs = do
+	let results = (msg =~ ("^/nick " ++ nick_regex) :: [[String]])
+	if (length (results !! 0) == 2)
+		then do
+			let newuser = results !! 0 !! 1
+			writeChan msgs (announce_name, 
+				user ++ " has changed their name to " ++ newuser)
+			readUser newuser sock msgs
+	else readUser user sock msgs
 
 -- This reads from the message queue and prints results over socket to user
 readMsgs :: Handle -> Chan Msg -> IO ()
