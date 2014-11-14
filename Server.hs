@@ -26,6 +26,7 @@ main = do
 	if length args == 1 && isInteger (args !! 0)
 	then
 		do
+		putStrLn "Starting Discordia..."
 		let portno = (read (head args) :: Integer) -- Convert first arg to Int
 		msgs <- newChan						-- Stores all messages
 		sock <- socket AF_INET Stream 0		-- Make new socket
@@ -33,8 +34,8 @@ main = do
 		-- Bind the socket to the listen port on every interface
 		bindSocket sock (SockAddrInet (fromIntegral portno) iNADDR_ANY)
 		listen sock max_connections 		-- Set max connections
-		putStrLn "Starting Discordia..."
 		forkIO (clearChannel msgs)			-- Prevent memory leak in msgs
+		putStrLn "Hail Eris!"
 		listenLoop sock msgs
 	else
 		putStrLn "Usage: Server <port number>"
@@ -100,7 +101,7 @@ readUser user sock msgs = do
 changeUsername :: String -> String -> Handle -> Chan Msg -> IO ()
 changeUsername user msg sock msgs = do
 	let results = (msg =~ ("^/nick " ++ nick_regex) :: [[String]])
-	if (length (results !! 0) == 2)
+	if (length (results !! 0) == 2 && (results !! 0 !! 1) /= announce_name)
 		then do
 			let newuser = results !! 0 !! 1
 			writeChan msgs (announce_name, 
@@ -113,7 +114,7 @@ readMsgs :: Handle -> Chan Msg -> IO ()
 readMsgs sock msgs = do
 	(user, msg) <- readChan msgs
 	-- hIsOpen blocks, so we use exceptions instead
-	handle (\(SomeException _) -> return ()) $ do
+	handle (\(SomeException _) -> hClose sock) $ do
 		hPutStrLn sock ("<" ++ user ++ "> " ++ msg)
 		readMsgs sock msgs
 
